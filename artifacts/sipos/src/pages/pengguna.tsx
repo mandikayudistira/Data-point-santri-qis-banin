@@ -4,16 +4,18 @@ import {
   useCreateUser, 
   useUpdateUser, 
   useDeleteUser,
+  useListSantri,
   getListUsersQueryKey,
   User,
-  UserInputRole
 } from '@workspace/api-client-react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit2, Trash2, X, ShieldAlert, KeyRound } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Edit2, Trash2, X, ShieldAlert, KeyRound, Link2, UserCheck, UserX } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+
+const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') + '/api';
 
 const userSchema = z.object({
   username: z.string().min(3, 'Username minimal 3 karakter'),
@@ -24,6 +26,14 @@ const userSchema = z.object({
 
 type UserFormValues = z.infer<typeof userSchema>;
 
+interface LinkedSantri {
+  id: number;
+  nis: string;
+  nama: string;
+  kelas: string;
+  asrama: string;
+}
+
 export default function PenggunaPage() {
   const queryClient = useQueryClient();
   const { data: users, isLoading } = useListUsers();
@@ -31,6 +41,7 @@ export default function PenggunaPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editItem, setEditItem] = useState<User | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [linkWaliUser, setLinkWaliUser] = useState<User | null>(null);
 
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
@@ -39,10 +50,7 @@ export default function PenggunaPage() {
   const handleCreate = async (data: UserFormValues) => {
     try {
       await createMutation.mutateAsync({ 
-        data: {
-          ...data,
-          password: data.password || 'password123', // fallback if empty, though schema enforces 6 chars for new
-        } 
+        data: { ...data, password: data.password || 'password123' } 
       });
       queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
       setIsAddOpen(false);
@@ -54,12 +62,7 @@ export default function PenggunaPage() {
     try {
       await updateMutation.mutateAsync({ 
         id: editItem.id, 
-        data: {
-          username: data.username,
-          nama: data.nama,
-          role: data.role,
-          password: data.password || undefined // omit if empty
-        } 
+        data: { username: data.username, nama: data.nama, role: data.role, password: data.password || undefined }
       });
       queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
       setEditItem(null);
@@ -122,10 +125,19 @@ export default function PenggunaPage() {
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {item.role === 'wali' && (
+                          <button
+                            onClick={() => setLinkWaliUser(item)}
+                            title="Hubungkan dengan Santri"
+                            className="p-1.5 text-muted-foreground hover:text-[#f59e0b] hover:bg-[#f59e0b]/10 rounded"
+                          >
+                            <Link2 className="w-4 h-4" />
+                          </button>
+                        )}
                         <button onClick={() => setEditItem(item)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        {item.username !== 'admin' && ( // Prevent deleting the main admin seeded account
+                        {item.username !== 'admin' && (
                           <button onClick={() => setDeleteId(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -153,9 +165,172 @@ export default function PenggunaPage() {
         />
       )}
       <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
+      {linkWaliUser && (
+        <LinkSantriDialog
+          user={linkWaliUser}
+          open={!!linkWaliUser}
+          onOpenChange={(o) => !o && setLinkWaliUser(null)}
+        />
+      )}
     </div>
   );
 }
+
+// --- Link Santri Dialog ---
+
+function LinkSantriDialog({ user, open, onOpenChange }: { user: User; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const queryClient = useQueryClient();
+  const [selectedSantriId, setSelectedSantriId] = useState<string>('');
+
+  const linkedKey = ['wali-santri-links', user.id];
+
+  const { data: linked = [], isLoading: loadingLinked } = useQuery<LinkedSantri[]>({
+    queryKey: linkedKey,
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/users/${user.id}/wali-santri`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Gagal memuat data');
+      return res.json();
+    },
+    enabled: open,
+  });
+
+  const { data: allSantriResp } = useListSantri({ status: 'aktif' });
+  const allSantri = allSantriResp?.data ?? [];
+
+  const linkedIds = new Set(linked.map((s) => s.id));
+  const available = allSantri.filter((s) => !linkedIds.has(s.id));
+
+  const addMutation = useMutation({
+    mutationFn: async (santriId: number) => {
+      const res = await fetch(`${API_BASE}/users/${user.id}/wali-santri`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ santriId }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Gagal menambahkan');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: linkedKey });
+      setSelectedSantriId('');
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (santriId: number) => {
+      const res = await fetch(`${API_BASE}/users/${user.id}/wali-santri/${santriId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Gagal menghapus');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: linkedKey });
+    },
+  });
+
+  const handleAdd = () => {
+    if (!selectedSantriId) return;
+    addMutation.mutate(parseInt(selectedSantriId, 10));
+  };
+
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-in fade-in-0" />
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] bg-card border border-border shadow-xl rounded-xl p-0 animate-in fade-in-0 zoom-in-95">
+          <div className="p-5 border-b border-border flex items-center justify-between">
+            <div>
+              <DialogPrimitive.Title className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-[#f59e0b]" />
+                Hubungkan Santri
+              </DialogPrimitive.Title>
+              <p className="text-xs text-muted-foreground mt-0.5">Akun: <span className="font-mono font-semibold">{user.username}</span> — {user.nama}</p>
+            </div>
+            <DialogPrimitive.Close className="text-muted-foreground hover:bg-muted p-1.5 rounded-md">
+              <X className="w-5 h-5" />
+            </DialogPrimitive.Close>
+          </div>
+
+          <div className="p-5 flex flex-col gap-5">
+            {/* Add new link */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Tambah Santri</label>
+              <div className="flex gap-2">
+                <select
+                  value={selectedSantriId}
+                  onChange={(e) => setSelectedSantriId(e.target.value)}
+                  className="flex-1 bg-background border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">-- Pilih santri --</option>
+                  {available.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nama} ({s.nis}) — {s.kelas}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleAdd}
+                  disabled={!selectedSantriId || addMutation.isPending}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  {addMutation.isPending ? 'Menyimpan...' : 'Tambah'}
+                </button>
+              </div>
+              {addMutation.isError && (
+                <p className="text-xs text-destructive">{(addMutation.error as Error).message}</p>
+              )}
+            </div>
+
+            {/* Currently linked */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Santri yang Terhubung</label>
+              {loadingLinked ? (
+                <p className="text-sm text-muted-foreground py-3 text-center">Memuat...</p>
+              ) : linked.length === 0 ? (
+                <div className="py-5 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                  Belum ada santri yang terhubung dengan akun ini.
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {linked.map((s) => (
+                    <li key={s.id} className="flex items-center justify-between px-4 py-3 bg-muted/40 border border-border rounded-lg">
+                      <div>
+                        <div className="font-semibold text-sm text-foreground">{s.nama}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{s.nis} · {s.kelas} · {s.asrama}</div>
+                      </div>
+                      <button
+                        onClick={() => removeMutation.mutate(s.id)}
+                        disabled={removeMutation.isPending}
+                        title="Putus hubungan"
+                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
+                      >
+                        <UserX className="w-4 h-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div className="p-5 border-t border-border flex justify-end bg-muted/10">
+            <button onClick={() => onOpenChange(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-foreground bg-background border border-border hover:bg-muted transition-colors">
+              Tutup
+            </button>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+}
+
+// --- User Form Dialog ---
 
 function UserDialog({ open, onOpenChange, title, defaultValues, onSubmit, isPending, mode }: any) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<UserFormValues>({
@@ -218,7 +393,6 @@ function UserDialog({ open, onOpenChange, title, defaultValues, onSubmit, isPend
                 />
                 {errors.password && <p className="text-xs text-destructive">{errors.password.message as string}</p>}
               </div>
-
             </form>
           </div>
 

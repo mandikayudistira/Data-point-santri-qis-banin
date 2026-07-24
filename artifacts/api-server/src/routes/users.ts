@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { eq } from "drizzle-orm";
-import { db, usersTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
+import { db, usersTable, waliSantriTable, santriTable } from "@workspace/db";
 
 const router: Router = Router();
 
@@ -67,6 +67,72 @@ router.delete("/users/:id", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
   await db.delete(usersTable).where(eq(usersTable.id, id));
+  res.sendStatus(204);
+});
+
+// --- Wali-Santri linking ---
+
+router.get("/users/:id/wali-santri", async (req, res): Promise<void> => {
+  if (req.session.role !== "admin") {
+    res.status(403).json({ error: "Akses ditolak" });
+    return;
+  }
+  const userId = parseInt(req.params.id as string, 10);
+  const rows = await db
+    .select({
+      id: santriTable.id,
+      nis: santriTable.nis,
+      nama: santriTable.nama,
+      kelas: santriTable.kelas,
+      asrama: santriTable.asrama,
+    })
+    .from(waliSantriTable)
+    .innerJoin(santriTable, eq(waliSantriTable.santriId, santriTable.id))
+    .where(eq(waliSantriTable.userId, userId));
+  res.json(rows);
+});
+
+router.post("/users/:id/wali-santri", async (req, res): Promise<void> => {
+  if (req.session.role !== "admin") {
+    res.status(403).json({ error: "Akses ditolak" });
+    return;
+  }
+  const userId = parseInt(req.params.id as string, 10);
+  const { santriId } = req.body;
+  if (!santriId) {
+    res.status(400).json({ error: "santriId wajib diisi" });
+    return;
+  }
+
+  // Check if user exists and is wali
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  if (!user) { res.status(404).json({ error: "Pengguna tidak ditemukan" }); return; }
+  if (user.role !== "wali") { res.status(400).json({ error: "Pengguna bukan role Wali Santri" }); return; }
+
+  // Check if already linked
+  const existing = await db
+    .select()
+    .from(waliSantriTable)
+    .where(and(eq(waliSantriTable.userId, userId), eq(waliSantriTable.santriId, santriId)));
+  if (existing.length > 0) {
+    res.status(409).json({ error: "Santri sudah terhubung dengan akun ini" });
+    return;
+  }
+
+  const [row] = await db.insert(waliSantriTable).values({ userId, santriId }).returning();
+  res.status(201).json(row);
+});
+
+router.delete("/users/:id/wali-santri/:santriId", async (req, res): Promise<void> => {
+  if (req.session.role !== "admin") {
+    res.status(403).json({ error: "Akses ditolak" });
+    return;
+  }
+  const userId = parseInt(req.params.id as string, 10);
+  const santriId = parseInt(req.params.santriId as string, 10);
+  await db
+    .delete(waliSantriTable)
+    .where(and(eq(waliSantriTable.userId, userId), eq(waliSantriTable.santriId, santriId)));
   res.sendStatus(204);
 });
 
