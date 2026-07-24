@@ -3,13 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: SIPOS - Sistem Informasi Poin Santri API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: santri
+    description: Data santri
+  - name: master-pelanggaran
+    description: Master data pelanggaran
+  - name: master-prestasi
+    description: Master data prestasi
+  - name: riwayat-poin
+    description: Riwayat poin santri
+  - name: dashboard
+    description: Dashboard statistik
+  - name: users
+    description: Manajemen pengguna
+
 paths:
   /healthz:
     get:
@@ -24,6 +39,513 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login pengguna
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Username atau password salah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout pengguna
+      responses:
+        "200":
+          description: Logout berhasil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Mendapatkan data user yang sedang login
+      responses:
+        "200":
+          description: Data user aktif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Belum login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /santri:
+    get:
+      operationId: listSantri
+      tags: [santri]
+      summary: Daftar semua santri
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: kelas
+          in: query
+          schema:
+            type: string
+        - name: asrama
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daftar santri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Santri"
+    post:
+      operationId: createSantri
+      tags: [santri]
+      summary: Tambah santri baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SantriInput"
+      responses:
+        "201":
+          description: Santri berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Santri"
+
+  /santri/{id}:
+    get:
+      operationId: getSantri
+      tags: [santri]
+      summary: Detail santri
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Detail santri
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SantriDetail"
+        "404":
+          description: Santri tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateSantri
+      tags: [santri]
+      summary: Update data santri
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SantriUpdate"
+      responses:
+        "200":
+          description: Santri berhasil diupdate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Santri"
+    delete:
+      operationId: deleteSantri
+      tags: [santri]
+      summary: Hapus santri
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Santri berhasil dihapus
+
+  /master-pelanggaran:
+    get:
+      operationId: listMasterPelanggaran
+      tags: [master-pelanggaran]
+      summary: Daftar master pelanggaran
+      responses:
+        "200":
+          description: Daftar master pelanggaran
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MasterPelanggaran"
+    post:
+      operationId: createMasterPelanggaran
+      tags: [master-pelanggaran]
+      summary: Tambah master pelanggaran
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MasterPelanggaranInput"
+      responses:
+        "201":
+          description: Master pelanggaran berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterPelanggaran"
+
+  /master-pelanggaran/{id}:
+    put:
+      operationId: updateMasterPelanggaran
+      tags: [master-pelanggaran]
+      summary: Update master pelanggaran
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MasterPelanggaranUpdate"
+      responses:
+        "200":
+          description: Master pelanggaran berhasil diupdate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterPelanggaran"
+    delete:
+      operationId: deleteMasterPelanggaran
+      tags: [master-pelanggaran]
+      summary: Hapus master pelanggaran
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Master pelanggaran berhasil dihapus
+
+  /master-prestasi:
+    get:
+      operationId: listMasterPrestasi
+      tags: [master-prestasi]
+      summary: Daftar master prestasi
+      responses:
+        "200":
+          description: Daftar master prestasi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MasterPrestasi"
+    post:
+      operationId: createMasterPrestasi
+      tags: [master-prestasi]
+      summary: Tambah master prestasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MasterPrestasiInput"
+      responses:
+        "201":
+          description: Master prestasi berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterPrestasi"
+
+  /master-prestasi/{id}:
+    put:
+      operationId: updateMasterPrestasi
+      tags: [master-prestasi]
+      summary: Update master prestasi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MasterPrestasiUpdate"
+      responses:
+        "200":
+          description: Master prestasi berhasil diupdate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterPrestasi"
+    delete:
+      operationId: deleteMasterPrestasi
+      tags: [master-prestasi]
+      summary: Hapus master prestasi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Master prestasi berhasil dihapus
+
+  /riwayat-poin:
+    get:
+      operationId: listRiwayatPoin
+      tags: [riwayat-poin]
+      summary: Daftar riwayat poin
+      parameters:
+        - name: santriId
+          in: query
+          schema:
+            type: integer
+        - name: tipe
+          in: query
+          schema:
+            type: string
+            enum: [pelanggaran, prestasi]
+        - name: tanggalMulai
+          in: query
+          schema:
+            type: string
+        - name: tanggalAkhir
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daftar riwayat poin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiwayatPoin"
+    post:
+      operationId: createRiwayatPoin
+      tags: [riwayat-poin]
+      summary: Tambah riwayat poin (pelanggaran atau prestasi)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RiwayatPoinInput"
+      responses:
+        "201":
+          description: Riwayat poin berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiwayatPoin"
+
+  /riwayat-poin/{id}:
+    delete:
+      operationId: deleteRiwayatPoin
+      tags: [riwayat-poin]
+      summary: Hapus riwayat poin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Riwayat poin berhasil dihapus
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Statistik dashboard
+      responses:
+        "200":
+          description: Statistik utama
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/aktivitas:
+    get:
+      operationId: getDashboardAktivitas
+      tags: [dashboard]
+      summary: Log aktivitas terbaru
+      responses:
+        "200":
+          description: Daftar aktivitas terbaru
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityLog"
+
+  /dashboard/top-santri:
+    get:
+      operationId: getDashboardTopSantri
+      tags: [dashboard]
+      summary: Top santri berdasarkan poin
+      parameters:
+        - name: tipe
+          in: query
+          schema:
+            type: string
+            enum: [prestasi, pelanggaran]
+      responses:
+        "200":
+          description: Top santri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopSantri"
+
+  /dashboard/grafik-bulanan:
+    get:
+      operationId: getDashboardGrafikBulanan
+      tags: [dashboard]
+      summary: Data grafik poin per bulan
+      responses:
+        "200":
+          description: Data grafik per bulan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GrafikBulanan"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Daftar pengguna (Admin only)
+      responses:
+        "200":
+          description: Daftar pengguna
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Tambah pengguna baru (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Pengguna berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update pengguna (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Pengguna berhasil diupdate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Hapus pengguna (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Pengguna berhasil dihapus
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +556,401 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [id, username, role, nama]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          type: string
+          enum: [admin, sayyid, wali]
+        nama:
+          type: string
+        waliSantriIds:
+          type: array
+          items:
+            type: integer
+
+    User:
+      type: object
+      required: [id, username, role, nama, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          type: string
+          enum: [admin, sayyid, wali]
+        nama:
+          type: string
+        createdAt:
+          type: string
+
+    UserInput:
+      type: object
+      required: [username, password, role, nama]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [admin, sayyid, wali]
+        nama:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, sayyid, wali]
+        nama:
+          type: string
+
+    Santri:
+      type: object
+      required: [id, nis, nama, kelas, kamar, asrama, status, totalPoin, createdAt]
+      properties:
+        id:
+          type: integer
+        nis:
+          type: string
+        nama:
+          type: string
+        ttl:
+          type: ["string", "null"]
+        jenisKelamin:
+          type: ["string", "null"]
+        kelas:
+          type: string
+        kamar:
+          type: ["string", "null"]
+        asrama:
+          type: string
+        namaOrtu:
+          type: ["string", "null"]
+        noHp:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [aktif, nonaktif, alumni]
+        totalPoin:
+          type: integer
+        createdAt:
+          type: string
+
+    SantriDetail:
+      type: object
+      required: [id, nis, nama, kelas, asrama, status, totalPoin, riwayatPoin, createdAt]
+      properties:
+        id:
+          type: integer
+        nis:
+          type: string
+        nama:
+          type: string
+        ttl:
+          type: ["string", "null"]
+        jenisKelamin:
+          type: ["string", "null"]
+        kelas:
+          type: string
+        kamar:
+          type: ["string", "null"]
+        asrama:
+          type: string
+        namaOrtu:
+          type: ["string", "null"]
+        noHp:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [aktif, nonaktif, alumni]
+        totalPoin:
+          type: integer
+        createdAt:
+          type: string
+        riwayatPoin:
+          type: array
+          items:
+            $ref: "#/components/schemas/RiwayatPoin"
+
+    SantriInput:
+      type: object
+      required: [nis, nama, kelas, asrama]
+      properties:
+        nis:
+          type: string
+        nama:
+          type: string
+        ttl:
+          type: string
+        jenisKelamin:
+          type: string
+        kelas:
+          type: string
+        kamar:
+          type: string
+        asrama:
+          type: string
+        namaOrtu:
+          type: string
+        noHp:
+          type: string
+        status:
+          type: string
+          enum: [aktif, nonaktif, alumni]
+
+    SantriUpdate:
+      type: object
+      properties:
+        nis:
+          type: string
+        nama:
+          type: string
+        ttl:
+          type: ["string", "null"]
+        jenisKelamin:
+          type: ["string", "null"]
+        kelas:
+          type: string
+        kamar:
+          type: ["string", "null"]
+        asrama:
+          type: string
+        namaOrtu:
+          type: ["string", "null"]
+        noHp:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [aktif, nonaktif, alumni]
+
+    MasterPelanggaran:
+      type: object
+      required: [id, kode, nama, poin, createdAt]
+      properties:
+        id:
+          type: integer
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MasterPelanggaranInput:
+      type: object
+      required: [kode, nama, poin]
+      properties:
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: string
+
+    MasterPelanggaranUpdate:
+      type: object
+      properties:
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: ["string", "null"]
+
+    MasterPrestasi:
+      type: object
+      required: [id, kode, nama, poin, createdAt]
+      properties:
+        id:
+          type: integer
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MasterPrestasiInput:
+      type: object
+      required: [kode, nama, poin]
+      properties:
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: string
+
+    MasterPrestasiUpdate:
+      type: object
+      properties:
+        kode:
+          type: string
+        nama:
+          type: string
+        poin:
+          type: integer
+        keterangan:
+          type: ["string", "null"]
+
+    RiwayatPoin:
+      type: object
+      required: [id, santriId, tipe, poin, tanggal, createdAt]
+      properties:
+        id:
+          type: integer
+        santriId:
+          type: integer
+        santriNama:
+          type: ["string", "null"]
+        tipe:
+          type: string
+          enum: [pelanggaran, prestasi]
+        masterId:
+          type: ["integer", "null"]
+        masterNama:
+          type: ["string", "null"]
+        poin:
+          type: integer
+        keterangan:
+          type: ["string", "null"]
+        tanggal:
+          type: string
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    RiwayatPoinInput:
+      type: object
+      required: [santriId, tipe, masterId, tanggal]
+      properties:
+        santriId:
+          type: integer
+        tipe:
+          type: string
+          enum: [pelanggaran, prestasi]
+        masterId:
+          type: integer
+        keterangan:
+          type: string
+        tanggal:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalSantri, pelanggaranHariIni, prestasiHariIni, pelanggaranBulanIni, prestasiBulanIni, santriAktif]
+      properties:
+        totalSantri:
+          type: integer
+        santriAktif:
+          type: integer
+        pelanggaranHariIni:
+          type: integer
+        prestasiHariIni:
+          type: integer
+        pelanggaranBulanIni:
+          type: integer
+        prestasiBulanIni:
+          type: integer
+
+    ActivityLog:
+      type: object
+      required: [id, aksi, detail, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        userName:
+          type: ["string", "null"]
+        aksi:
+          type: string
+        detail:
+          type: string
+        createdAt:
+          type: string
+
+    TopSantri:
+      type: object
+      required: [id, nis, nama, kelas, asrama, totalPoin, jumlahKejadian]
+      properties:
+        id:
+          type: integer
+        nis:
+          type: string
+        nama:
+          type: string
+        kelas:
+          type: string
+        asrama:
+          type: string
+        totalPoin:
+          type: integer
+        jumlahKejadian:
+          type: integer
+
+    GrafikBulanan:
+      type: object
+      required: [bulan, tahun, pelanggaran, prestasi]
+      properties:
+        bulan:
+          type: string
+        tahun:
+          type: integer
+        pelanggaran:
+          type: integer
+        prestasi:
+          type: integer

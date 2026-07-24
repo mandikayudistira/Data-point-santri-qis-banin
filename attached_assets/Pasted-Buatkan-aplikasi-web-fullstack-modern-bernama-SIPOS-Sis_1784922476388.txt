@@ -1,0 +1,50 @@
+Buatkan aplikasi web fullstack modern bernama SIPOS (Sistem Informasi Poin Santri) untuk mengelola data santri, poin pelanggaran, dan prestasi di lingkungan pondok pesantren.
+
+INSTRUKSI EFISIENSI AGENT (PENTING - AGAR HEMAT KREDIT & BEBAS ERROR):
+
+Langsung eksekusi Seed Data SQLite secara otomatis saat aplikasi dinyalakan (panggil fungsi seedDatabase() di dalam file utama server sebelum app.listen()).
+
+WAJIB HARDCODE AKUN SIAP PAKAI di Database Seed dan TAMPILKAN DAFTAR AKUN INI DI HALAMAN LOGIN sebagai petunjuk login:
+
+Admin: Username: admin | Password: adminpassword
+
+Sayyid: Username: sayyid | Password: sayyidpassword
+
+Wali Santri: Username: wali_santri1 | Password: walipassword
+
+Gunakan autentikasi Sederhana/Session Cookie yang ringan. Jangan gunakan library hashing yang berat atau kompleksitas auth yang memicu Typecheck Loop.
+
+TEKNOLOGI & ARCHITECTURE:
+
+Backend: Node.js + Express + SQLite (better-sqlite3 / sqlite3).
+
+Frontend: React + Vite + Tailwind CSS + Lucide Icons.
+
+PDF/Excel: Gunakan window.print() untuk cetak laporan dan generator CSV sederhana untuk Export Excel (tanpa library PDF berat).
+
+SISTEM AUTH & 3 ROLE PENGGUNA:
+
+Admin: Akses Penuh (Kelola pengguna, santri, master poin, laporan, kelola sistem).
+
+Sayyid: Kelola data santri, input/edit pelanggaran & prestasi, lihat dashboard, cetak laporan.
+
+Wali Santri: Login via akun khusus. Read-only hanya untuk data anak yang terhubung (Profil Anak, Total Poin, Riwayat, Grafik Perkembangan).
+
+FITUR UTAMA APLIKASI:
+
+Dashboard Pengurus: Total Santri, Pelanggaran/Prestasi Hari & Bulan Ini, Grafik per bulan, Top 10 Santri Prestasi/Pelanggaran, Log Aktivitas.
+
+Data Santri (CRUD + Search/Filter): NIS, Nama, TTL, JK, Kelas, Kamar, Asrama, Ortu/Wali, No HP, Status.
+
+Master Poin (Admin Only): Master Pelanggaran & Master Prestasi beserta bobot poinnya.
+
+Input Pelanggaran & Prestasi: Pilih Santri, Poin otomatis dari Master, Tanggal, Keterangan. Total poin santri otomatis ter-update.
+
+Profil Santri & Laporan: Detail Poin Akumulasi, Cetak PDF (window.print()), dan Export CSV.
+
+Menu Wali Santri: Tampilan khusus ringkasan poin dan riwayat santri terkait.
+
+DATABASE SCHEMA & SEED:
+Tabel SQLite: users, santri, master_pelanggaran, master_prestasi, riwayat_poin, activity_logs.
+
+TUGAS UTAMA: Buat aplikasi ini bekerja dalam sekali jalan (single pass build), pastikan route /api/auth/login dan /api/auth/me berfungsi tanpa error 401 Unauthorized, dan aplikasi langsung bisa digunakan saat tombol Run diklik."
