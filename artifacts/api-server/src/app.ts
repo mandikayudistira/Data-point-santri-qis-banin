@@ -7,6 +7,12 @@ import { sessionMiddleware } from "./middlewares/session";
 
 const app: Express = express();
 
+// Trust the reverse proxy (Replit, Cloudflare, etc.) so that
+// req.secure / req.protocol reflect the original HTTPS connection.
+// Without this, secure:true session cookies are never sent back by
+// the browser because the app believes the connection is plain HTTP.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
