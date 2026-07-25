@@ -87,10 +87,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-card border-b border-border z-20">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            S
+          <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-sm">
+            <img src="/logo.png" alt="QIPOS" className="w-full h-full object-contain" />
           </div>
-          <span className="font-bold text-foreground">SIPOS</span>
+          <span className="font-bold text-foreground">QIPOS</span>
         </div>
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -110,11 +110,11 @@ export function AppLayout({ children }: AppLayoutProps) {
         `}
       >
         <div className="p-6 hidden md:flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-sm">
-            S
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-sm flex-shrink-0">
+            <img src="/logo.png" alt="QIPOS" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight text-foreground">SIPOS</h1>
+            <h1 className="font-bold text-lg leading-tight text-foreground">QIPOS</h1>
             <p className="text-xs text-muted-foreground">Poin Santri</p>
           </div>
         </div>

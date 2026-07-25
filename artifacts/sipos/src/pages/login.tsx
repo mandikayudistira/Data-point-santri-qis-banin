@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin, getGetMeQueryKey } from '@workspace/api-client-react';
 import { useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
-import { Leaf } from 'lucide-react';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username diperlukan'),
@@ -46,11 +45,11 @@ export default function LoginPage() {
       
       <div className="w-full max-w-md z-10 flex flex-col gap-8">
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg mb-2">
-            <Leaf className="w-8 h-8" />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mb-2 bg-white flex items-center justify-center">
+            <img src="/logo.png" alt="QIPOS Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">SIPOS</h1>
-          <p className="text-muted-foreground text-sm font-medium">Sistem Informasi Poin Santri</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">QIPOS</h1>
+          <p className="text-muted-foreground text-sm font-medium">Qonita Islamic Point Organization System</p>
         </div>
 
         <div className="bg-card border border-border shadow-xl rounded-2xl p-6 sm:p-8">
