@@ -194,8 +194,7 @@ function LinkSantriDialog({ user, open, onOpenChange }: { user: User; open: bool
     enabled: open,
   });
 
-  const { data: allSantriResp } = useListSantri({ status: 'aktif' });
-  const allSantri = allSantriResp?.data ?? [];
+  const { data: allSantri = [] } = useListSantri({ status: 'aktif' });
 
   const linkedIds = new Set(linked.map((s) => s.id));
   const available = allSantri.filter((s) => !linkedIds.has(s.id));

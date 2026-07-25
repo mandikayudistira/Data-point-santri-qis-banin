@@ -105,26 +105,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="bg-secondary/50 border border-secondary p-4 rounded-xl text-sm">
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary" />
-            Akun Demo
-          </h3>
-          <div className="grid gap-2 font-mono text-xs">
-            <div className="flex justify-between items-center bg-card p-2 rounded border border-border">
-              <span className="font-sans text-muted-foreground">Admin:</span>
-              <span className="select-all">admin / adminpassword</span>
-            </div>
-            <div className="flex justify-between items-center bg-card p-2 rounded border border-border">
-              <span className="font-sans text-muted-foreground">Sayyid/Ustadz:</span>
-              <span className="select-all">sayyid / sayyidpassword</span>
-            </div>
-            <div className="flex justify-between items-center bg-card p-2 rounded border border-border">
-              <span className="font-sans text-muted-foreground">Wali Santri:</span>
-              <span className="select-all">wali_santri1 / walipassword</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
