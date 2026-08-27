@@ -32,7 +32,23 @@ app.use(
     },
   }),
 );
-app.use(cors({ origin: true, credentials: true }));
+const corsOrigins = (process.env.CORS_ORIGIN ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: corsOrigins.length > 0
+    ? (origin, callback) => {
+        if (!origin || corsOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Origin tidak diizinkan oleh CORS"));
+        }
+      }
+    : false,
+  credentials: true,
+}));
 app.use(sessionMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

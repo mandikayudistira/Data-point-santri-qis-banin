@@ -1,0 +1,1 @@
+- [Linux hosting](linux-hosting.md) — QIPOS expects a same-origin `/api` proxy or explicit API/CORS configuration; production sessions require PostgreSQL storage.

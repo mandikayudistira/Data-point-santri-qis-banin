@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { useGetMe, AuthUser } from '@workspace/api-client-react';
+import { useGetMe, getGetMeQueryKey, AuthUser } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
@@ -15,13 +15,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { data: user, isLoading, error } = useGetMe({
     query: {
+      queryKey: getGetMeQueryKey(),
       retry: false,
       staleTime: 5 * 60 * 1000,
     }
   });
 
   const logout = () => {
-    queryClient.setQueryData(['/api/auth/me'], null);
+    queryClient.setQueryData(getGetMeQueryKey(), null);
   };
 
   return (

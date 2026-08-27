@@ -171,11 +171,11 @@ function MasterPelanggaranTab() {
       />
       {editItem && (
         <MasterDialog 
-          open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} title="Edit Master Pelanggaran" 
+          open={!!editItem} onOpenChange={(o: boolean) => !o && setEditItem(null)} title="Edit Master Pelanggaran"
           defaultValues={editItem} onSubmit={handleUpdate} isPending={updateMutation.isPending} type="pelanggaran"
         />
       )}
-      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
+      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o: boolean) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
     </div>
   );
 }
@@ -281,11 +281,11 @@ function MasterPrestasiTab() {
       />
       {editItem && (
         <MasterDialog 
-          open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} title="Edit Master Prestasi" 
+          open={!!editItem} onOpenChange={(o: boolean) => !o && setEditItem(null)} title="Edit Master Prestasi"
           defaultValues={editItem} onSubmit={handleUpdate} isPending={updateMutation.isPending} type="prestasi"
         />
       )}
-      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
+      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o: boolean) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
     </div>
   );
 }

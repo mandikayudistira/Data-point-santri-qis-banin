@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 
-const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') + '/api';
+const API_BASE = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')}/api`;
 
 const userSchema = z.object({
   username: z.string().min(3, 'Username minimal 3 karakter'),
@@ -160,16 +160,16 @@ export default function PenggunaPage() {
       />
       {editItem && (
         <UserDialog 
-          open={!!editItem} onOpenChange={(o) => !o && setEditItem(null)} title="Edit Pengguna" 
+          open={!!editItem} onOpenChange={(o: boolean) => !o && setEditItem(null)} title="Edit Pengguna"
           defaultValues={editItem} onSubmit={handleUpdate} isPending={updateMutation.isPending} mode="edit"
         />
       )}
-      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
+      <DeleteConfirmDialog open={!!deleteId} onOpenChange={(o: boolean) => !o && setDeleteId(null)} onConfirm={handleDelete} isPending={deleteMutation.isPending} />
       {linkWaliUser && (
         <LinkSantriDialog
           user={linkWaliUser}
           open={!!linkWaliUser}
-          onOpenChange={(o) => !o && setLinkWaliUser(null)}
+          onOpenChange={(o: boolean) => !o && setLinkWaliUser(null)}
         />
       )}
     </div>

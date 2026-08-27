@@ -1,0 +1,18 @@
+[Unit]
+Description=QIPOS API server
+After=network.target
+
+[Service]
+Type=simple
+User=qipos
+Group=qipos
+WorkingDirectory=/var/www/qipos
+EnvironmentFile=/etc/qipos/qipos-api.env
+ExecStart=/usr/bin/node /var/www/qipos/artifacts/api-server/dist/index.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

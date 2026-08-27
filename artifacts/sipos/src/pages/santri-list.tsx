@@ -39,7 +39,7 @@ export default function SantriList() {
   const queryClient = useQueryClient();
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     clearTimeout(searchTimeoutRef.current);
@@ -246,7 +246,16 @@ export default function SantriList() {
           open={!!editSantri} 
           onOpenChange={(o) => !o && setEditSantri(null)} 
           title="Edit Data Santri" 
-          defaultValues={editSantri}
+          defaultValues={{
+            ...editSantri,
+            ttl: editSantri.ttl ?? undefined,
+            jenisKelamin: editSantri.jenisKelamin === 'L' || editSantri.jenisKelamin === 'P'
+              ? editSantri.jenisKelamin
+              : undefined,
+            kamar: editSantri.kamar ?? undefined,
+            namaOrtu: editSantri.namaOrtu ?? undefined,
+            noHp: editSantri.noHp ?? undefined,
+          }}
           onSubmit={handleUpdate}
           isPending={updateMutation.isPending}
         />
