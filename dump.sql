@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6hoowidoXdKw0pKb1AAkP7Igbjs9UJ9K3EbntxH7uX06MlK5GflPLB5CTUd4hYG
+\restrict fZKTrgVz9Lq5A1d6Lt0b9NAApFMorVrTPNkRPl5us4FDMXQkYLNwHPpxrLAinDx
 
 -- Dumped from database version 16.10
 -- Dumped by pg_dump version 16.10
@@ -666,5 +666,5 @@ ALTER TABLE ONLY public.wali_santri
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6hoowidoXdKw0pKb1AAkP7Igbjs9UJ9K3EbntxH7uX06MlK5GflPLB5CTUd4hYG
+\unrestrict fZKTrgVz9Lq5A1d6Lt0b9NAApFMorVrTPNkRPl5us4FDMXQkYLNwHPpxrLAinDx
 
